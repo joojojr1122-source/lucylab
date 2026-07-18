@@ -1,5 +1,8 @@
 import { AccessToken } from "livekit-server-sdk";
 import { randomUUID } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import Stripe from "stripe";
 import { getStore as getCreditStore, RATE_PER_SECOND, FREE_CREDITS } from "./store.js";
 import { getStore as getUsers, bcrypt } from "./users.js";
@@ -364,6 +367,29 @@ const http = createServer(async (req, res) => {
       if (userId) await users.setVerification(userId, "failed");
     }
     return send(res, 200, { received: true });
+  }
+
+  // Serve the built web app in production (if present).
+  // Repo root is 4 segments up from packages/server/src/index.js
+  // (index.js -> src -> server -> packages -> root).
+  const REPO_ROOT = path.resolve(fileURLToPath(import.meta.url), "../../../../");
+  const WEB_DIST = path.join(REPO_ROOT, "packages", "web", "dist");
+  if (req.method === "GET" && !req.url.startsWith("/api/")) {
+    if (fs.existsSync(WEB_DIST)) {
+      const urlPath = decodeURIComponent(req.url.split("?")[0]);
+      const safe = urlPath.replace(/\.\.+/g, "");
+      let filePath = path.resolve(WEB_DIST, safe === "/" ? "index.html" : safe);
+      if (!filePath.startsWith(WEB_DIST)) return send(res, 403, { error: "forbidden" });
+      if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+        filePath = path.join(WEB_DIST, "index.html");
+      }
+      if (fs.existsSync(filePath)) {
+        const ext = path.extname(filePath);
+        const types = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".ico": "image/x-icon" };
+        res.writeHead(200, { "content-type": types[ext] || "application/octet-stream" });
+        return fs.createReadStream(filePath).pipe(res);
+      }
+    }
   }
 
   send(res, 404, { error: "not found" });

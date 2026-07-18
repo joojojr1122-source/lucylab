@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm install && npm run build:web",
+  "outputDirectory": "packages/web/dist",
+  "framework": "vite",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "env": {
+    "VITE_API_BASE": "@lucy_api_base",
+    "VITE_STRIPE_PUBLISHABLE_KEY": "@lucy_stripe_pub"
+  }
+}
