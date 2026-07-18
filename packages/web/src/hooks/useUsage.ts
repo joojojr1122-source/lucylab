@@ -10,6 +10,30 @@ export interface UsageState {
 export function useUsage() {
   const [usage, setUsage] = useState<UsageState>({ secondsRemaining: 0, ratePerSecond: 0.05 });
   const [sessionId, setSessionId] = useState<string>();
+  const [consent, setConsent] = useState(false);
+
+  const refreshConsent = useCallback(async () => {
+    try {
+      const d = await (await fetch("/api/consent", { credentials: "include" })).json();
+      setConsent(Boolean(d.accepted));
+    } catch {
+      setConsent(false);
+    }
+  }, []);
+
+  const acceptConsent = useCallback(async () => {
+    try {
+      await fetch("/api/consent", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      setConsent(true);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const refresh = useCallback(async () => {
     try {
@@ -84,9 +108,10 @@ export function useUsage() {
 
   useEffect(() => {
     refresh();
+    refreshConsent();
     const t = setInterval(refresh, 5000);
     return () => clearInterval(t);
-  }, [refresh]);
+  }, [refresh, refreshConsent]);
 
-  return { usage, sessionId, refresh, start, stop, topup };
+  return { usage, sessionId, consent, refresh, refreshConsent, acceptConsent, start, stop, topup };
 }

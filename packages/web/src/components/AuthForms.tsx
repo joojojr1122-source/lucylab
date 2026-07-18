@@ -6,14 +6,12 @@ export function AuthForms({
   onGoogle,
   googleEnabled,
   emailUnverified,
-  onResend,
 }: {
   onLogin: (e: string, p: string) => Promise<void>;
   onRegister: (e: string, p: string) => Promise<void>;
   onGoogle: () => void;
   googleEnabled: boolean;
   emailUnverified?: boolean;
-  onResend?: () => void;
 }) {
   const [mode, setMode] = useState<"login" | "register">("register");
   const [email, setEmail] = useState("");

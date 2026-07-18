@@ -7,6 +7,7 @@ export function useConfig() {
 
   useEffect(() => {
     const base =
+      import.meta.env.VITE_API_BASE ||
       import.meta.env.VITE_PUBLIC_SERVER_URL ||
       (window.location.origin.startsWith("http://localhost:5173")
         ? "http://localhost:8787"
@@ -18,6 +19,7 @@ export function useConfig() {
           falEndpoint: d.falEndpoint,
           publicServerUrl: base,
           stripeEnabled: Boolean(d.stripeEnabled),
+          googleEnabled: Boolean(d.googleEnabled),
         })
       )
       .catch((e) => setError(String(e)));

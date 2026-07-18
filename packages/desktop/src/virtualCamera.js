@@ -11,7 +11,7 @@ const OBSWebSocket = require("obs-websocket-js");
  * start the virtual camera. If OBS isn't available we report unavailable and the
  * UI falls back to manual OBS Window Capture.
  */
-export class VirtualCamera {
+class VirtualCamera {
   constructor(win) {
     this.win = win;
     this.obs = new OBSWebSocket();
@@ -100,3 +100,5 @@ export class VirtualCamera {
     }
   }
 }
+
+module.exports = { VirtualCamera };

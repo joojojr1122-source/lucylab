@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLucyBroadcast } from "../hooks/useLucyBroadcast";
 import { TransformControls } from "./TransformControls";
+import { ConsentGate } from "./ConsentGate";
 import type { CallConfig } from "../hooks/useLucyCall";
 import type { useUsage } from "../hooks/useUsage";
 
@@ -43,6 +44,13 @@ export function BroadcastView({
   };
 
   if (!transformedStream) {
+    if (!usage.consent) {
+      return (
+        <div className="broadcast-idle">
+          <ConsentGate onAccept={usage.acceptConsent} />
+        </div>
+      );
+    }
     return (
       <div className="broadcast-idle">
         <div className="broadcast-card">

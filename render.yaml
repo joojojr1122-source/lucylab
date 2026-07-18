@@ -1,23 +1,7 @@
 # Render (https://render.com) Blueprint.
-# Two services: a static web frontend (Vercel-style CDN) + a long-running
-# backend service. A Redis instance is provisioned automatically.
+# Single Docker service runs the server, which also serves the built web app
+# (packages/web/dist) in production. Redis is provisioned automatically.
 services:
-  - type: web
-    name: lucy-web
-    runtime: static
-    buildCommand: npm install && npm run build:web
-    staticPublishPath: packages/web/dist
-    pullRequestPreviews: true
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_BASE
-        sync: false
-      - key: VITE_STRIPE_PUBLISHABLE_KEY
-        sync: false
-
   - type: web
     name: lucy-server
     runtime: docker

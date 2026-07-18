@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  web:
+    name: Web typecheck + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit -p packages/web/tsconfig.json
+      - run: npm run build:web
+
+  server:
+    name: Server boot smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Boot server (in-memory) and probe endpoints
+        run: |
+          node packages/server/src/index.js &
+          SRV=$!
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:8787/api/config >/dev/null; then break; fi
+            sleep 0.5
+          done
+          curl -sf http://localhost:8787/api/config | grep -q falEndpoint
+          curl -sf http://localhost:8787/api/status | grep -q fal
+          kill $SRV
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t lucy-call .

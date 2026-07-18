@@ -7,6 +7,7 @@ export interface CallConfig {
   falEndpoint: string;
   publicServerUrl: string;
   stripeEnabled: boolean;
+  googleEnabled?: boolean;
 }
 
 export function useLucyCall(

@@ -75,6 +75,14 @@ class MemoryStore {
     return id ? this.users.get(id) : null;
   }
 
+  async linkGoogle(id, googleSub) {
+    const u = this.users.get(id);
+    if (u) {
+      u.googleSub = googleSub;
+      this.byGoogle.set(googleSub, id);
+    }
+  }
+
   async findById(id) {
     return this.users.get(id) || null;
   }
@@ -176,6 +184,10 @@ class PgStore {
   async findByGoogleSub(sub) {
     const { rows } = await this.db.query(`SELECT * FROM users WHERE google_sub=$1`, [sub]);
     return rows[0] || null;
+  }
+
+  async linkGoogle(id, googleSub) {
+    await this.db.query(`UPDATE users SET google_sub=$2 WHERE id=$1`, [id, googleSub]);
   }
 
   async findById(id) {

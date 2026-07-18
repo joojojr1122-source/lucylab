@@ -110,7 +110,7 @@ const http = createServer(async (req, res) => {
       publicServerUrl: PUBLIC_SERVER_URL,
       livekitUrl: LIVEKIT_URL,
       stripeEnabled: Boolean(stripe),
-      identityEnabled: true,
+      identityEnabled: Boolean(stripe),
       googleEnabled: googleEnabled(),
     });
   }
@@ -331,12 +331,13 @@ const http = createServer(async (req, res) => {
   if (url.pathname === "/api/consent" && req.method === "GET") {
     const user = await requireUser(users, req);
     if (!user) return send(res, 401, { error: "unauthenticated" });
-    return send(res, 200, { accepted: user.verified });
+    return send(res, 200, { accepted: await credits.getConsent(user.id) });
   }
   if (url.pathname === "/api/consent" && req.method === "POST") {
     const user = await requireUser(users, req);
     if (!user) return send(res, 401, { error: "unauthenticated" });
-    return send(res, 200, { accepted: user.verified });
+    await credits.setConsent(user.id);
+    return send(res, 200, { accepted: true });
   }
 
   // ---------------- Stripe webhooks (credits + identity) ----------------

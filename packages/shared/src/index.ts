@@ -21,6 +21,8 @@ export interface ConnectionConfig {
   falEndpoint: string;
   publicServerUrl: string;
   stripeEnabled: boolean;
+  googleEnabled?: boolean;
+  identityEnabled?: boolean;
 }
 
 export const DEFAULT_TRANSFORMS: Record<TransformKind, LucyState> = {
