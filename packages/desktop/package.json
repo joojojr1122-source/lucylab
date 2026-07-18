@@ -1,0 +1,33 @@
+{
+  "name": "@lucy-call/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "electron . --dev",
+    "build": "npm run build --workspace packages/web && electron-builder"
+  },
+  "dependencies": {
+    "electron-is-dev": "^3.0.0",
+    "obs-websocket-js": "^5.0.0"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.lucycall.app",
+    "productName": "Lucy Call",
+    "files": [
+      "src/**/*",
+      "package.json",
+      "out/**/*"
+    ],
+    "extraResources": [
+      { "from": "../web/dist", "to": "web" }
+    ],
+    "win": { "target": "nsis" },
+    "mac": { "target": "dmg" },
+    "linux": { "target": "AppImage" }
+  }
+}

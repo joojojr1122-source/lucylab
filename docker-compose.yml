@@ -1,0 +1,44 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lucy
+      POSTGRES_PASSWORD: lucy
+      POSTGRES_DB: lucy
+    ports:
+      - "5432:5432"
+    volumes:
+      - lucy_pg:/var/lib/postgresql/data
+
+  server:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      PORT: 8787
+      DATABASE_URL: postgres://lucy:lucy@db:5432/lucy
+      REDIS_URL: redis://redis:6379
+      PUBLIC_SERVER_URL: ${PUBLIC_SERVER_URL:-http://localhost:8787}
+      FAL_KEY: ${FAL_KEY:-}
+      FAL_LUCY_ENDPOINT: decart/lucy-2-5/realtime
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:-}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:-}
+      LIVEKIT_URL: ${LIVEKIT_URL:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      CREDIT_RATE_PER_SECOND: ${CREDIT_RATE_PER_SECOND:-0.05}
+      FREE_CREDITS: ${FREE_CREDITS:-10}
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  lucy_pg:
